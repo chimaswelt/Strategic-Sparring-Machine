@@ -246,6 +246,8 @@
   <div class="project-switcher-wrap" id="project-switcher-wrap"></div>
   <div class="header-actions">
     <button class="hdr-btn" onclick="openExportModal()">Export ↓</button>
+    <button class="hdr-btn" id="obsidian-btn" onclick="saveToObsidian()">→ Obsidian</button>
+    <button class="hdr-btn" onclick="saveToObsidian()" id="obsidian-btn">→ Obsidian</button>
     <button class="hdr-btn accent" onclick="saveCurrentSession()">Speichern ✓</button>
   </div>
 </header>
@@ -762,6 +764,55 @@ async function sendMessage() {
     addMsg('ai',`Verbindungsfehler: ${e.message}`,null);
   }
   btn.disabled=false; input.focus();
+}
+
+
+async function saveToObsidian() {
+  if (!currentProjectId) { alert('Bitte zuerst ein Projekt wählen.'); return; }
+  if (conversationHistory.length === 0) { alert('Keine Session zum Speichern.'); return; }
+  const btn = document.getElementById('obsidian-btn');
+  btn.textContent = 'Speichert...'; btn.disabled = true;
+  const p = getProject(currentProjectId);
+  const date = new Date().toLocaleDateString('de-DE');
+  let md = '# Sparring Session — ' + p.name + '
+';
+  md += '**Datum:** ' + date + ' · **Modus:** ' + MODES[currentMode].label + '
+';
+  md += '**Studio:** FRMTN (Nico & Chima)
+
+---
+
+';
+  conversationHistory.forEach(m => {
+    if (m.role === 'user') { md += '### → Studio
+' + m.content + '
+
+'; }
+    else {
+      const t = detectTag(m.content);
+      if (t) md += '**[' + t.text + ']**
+';
+      md += '### Sparring Machine
+' + m.content + '
+
+---
+
+';
+    }
+  });
+  const firstUser = conversationHistory.find(m => m.role === 'user');
+  const title = firstUser ? firstUser.content.slice(0,50) : 'Session · ' + date;
+  try {
+    const res = await fetch('https://sparring.frmtn.studio/save-note.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, project: p.name, content: md })
+    });
+    const data = await res.json();
+    if (data.success) { showSaveFlash('In Obsidian gespeichert ✓'); }
+    else { alert('Fehler: ' + (data.error || 'Unbekannt')); }
+  } catch(e) { alert('Verbindungsfehler: ' + e.message); }
+  finally { btn.textContent = '→ Obsidian'; btn.disabled = false; }
 }
 
 function showSaveFlash(msg) {
