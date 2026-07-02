@@ -363,17 +363,22 @@ let selectedColor = SWATCHES[0];
 // ═══════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════
-async function init() {
+async async function init() {
   renderColorPicker();
-  try {
-    const { data, error } = await sb.from('projects').select('*').order('created_at');
-    if (!error && data) data.forEach(p => { customProjects[p.id] = { ...p, builtin: false, tensions: p.tensions || [], tension_values: p.tension_values || [] }; });
-    setStatus('connected', 'Verbunden · Supabase');
-  } catch(e) {
-    setStatus('error', 'Offline — Supabase nicht erreichbar');
-  }
+  // Builtin-Projekte sofort rendern — kein Warten auf Supabase
   renderProjectSwitcher();
   showWelcome();
+  // Dann Supabase im Hintergrund laden
+  try {
+    const { data, error } = await sb.from('projects').select('*').order('created_at');
+    if (!error && data) {
+      data.forEach(p => { customProjects[p.id] = { ...p, builtin: false, tensions: p.tensions || [], tension_values: p.tension_values || [] }; });
+      renderProjectSwitcher(); // nochmal rendern mit custom projects
+    }
+    setStatus('connected', 'Verbunden · Supabase');
+  } catch(e) {
+    setStatus('error', 'Offline — nur Builtin-Projekte verfügbar');
+  }
 }
 
 function setStatus(state, text) {
