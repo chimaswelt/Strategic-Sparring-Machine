@@ -578,7 +578,7 @@ async function sendMsg() {
   const p=getProj(curProj);
   const sys=MODES[curMode].sys+`\n\nPROJEKT: ${p.name}\nKONTEXT: ${p.context||''}\nSPANNUNGEN: ${(p.tensions||[]).join(', ')}\nFOKUS: ${p.focus||''}`;
   try {
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,messages:history})});
+    const res=await fetch('https://sparring.frmtn.studio/proxy.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,messages:history})});
     const data=await res.json();
     document.getElementById('typing')?.remove();
     const aiText=data.content?.map(b=>b.text||'').join('\n')||'Keine Antwort erhalten.';
