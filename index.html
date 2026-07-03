@@ -499,7 +499,7 @@ async function saveToObsidian() {
   const firstUser=history.find(m=>m.role==='user');
   const title=firstUser?firstUser.content.slice(0,50):'Session · '+date;
   try {
-    const r=await fetch('https://sparring.frmtn.studio/save-note.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title,project:p.name,content:md})});
+    const r=await fetch('http://5728493.swh.strato-hosting.eu/website_frmtn_chima/sparring/save-note.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title,project:p.name,content:md})});
     const d=await r.json();
     if(d.success)showFlash('In Obsidian gespeichert ✓'); else alert('Fehler: '+(d.error||'Unbekannt'));
   } catch(e){alert('Verbindungsfehler: '+e.message);}
@@ -578,7 +578,7 @@ async function sendMsg() {
   const p=getProj(curProj);
   const sys=MODES[curMode].sys+`\n\nPROJEKT: ${p.name}\nKONTEXT: ${p.context||''}\nSPANNUNGEN: ${(p.tensions||[]).join(', ')}\nFOKUS: ${p.focus||''}`;
   try {
-    const res=await fetch('https://sparring.frmtn.studio/proxy.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,messages:history})});
+    const res=await fetch('http://5728493.swh.strato-hosting.eu/website_frmtn_chima/sparring/proxy.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,messages:history})});
     const data=await res.json();
     document.getElementById('typing')?.remove();
     const aiText=data.content?.map(b=>b.text||'').join('\n')||'Keine Antwort erhalten.';
